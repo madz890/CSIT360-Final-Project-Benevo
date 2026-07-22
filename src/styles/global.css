@@ -1,3 +1,6 @@
+@import "./auth.css";
+@import "./dashboard.css";
+
 * {
   margin: 0;
   padding: 0;
@@ -7,4 +10,8 @@
 
 body {
   background-color: #f5f7fa;
+}
+
+#root {
+  min-height: 100vh;
 }
