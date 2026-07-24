@@ -1,16 +1,3 @@
-import {
-  Address,
-  TransactionBuilder,
-  TransactionBuilderConfigBuilder,
-  TransactionOutput,
-  TransactionUnspentOutput,
-  TransactionWitnessSet,
-  Transaction,
-  LinearFee,
-  BigNum,
-  Value,
-} from "@emurgo/cardano-serialization-lib-browser";
-
 const BLOCKFROST_BASE_URL = "https://cardano-mainnet.blockfrost.io/api/v0";
 const BLOCKFROST_PROJECT_ID =
   import.meta.env.VITE_BLOCKFROST_PROJECT_ID ||
@@ -34,11 +21,68 @@ function bytesToHex(bytes) {
     .join("");
 }
 
+function normalizeAddress(AddressClass, address) {
+  if (!address) {
+    return "";
+  }
+
+  try {
+    return AddressClass.from_bech32(address).to_bech32();
+  } catch {
+    try {
+      return AddressClass.from_bytes(hexToBytes(address)).to_bech32();
+    } catch {
+      throw new Error(
+        "Unable to parse the Cardano address. Use a valid bech32 or hex address.",
+      );
+    }
+  }
+}
+
 function getBlockfrostHeaders() {
   return {
     project_id: BLOCKFROST_PROJECT_ID,
     "Content-Type": "application/json",
   };
+}
+
+function normalizeProtocolNumber(value, name) {
+  const stringValue = String(value ?? "");
+  if (!/^[0-9]+$/.test(stringValue)) {
+    throw new Error(
+      `Cardano protocol parameter ${name} is invalid or missing: ${stringValue}`,
+    );
+  }
+  return stringValue;
+}
+
+function getCoinsPerUtxoByte(protocolParameters) {
+  if (
+    protocolParameters.coins_per_utxo_byte !== undefined &&
+    protocolParameters.coins_per_utxo_byte !== null
+  ) {
+    return normalizeProtocolNumber(
+      protocolParameters.coins_per_utxo_byte,
+      "coins_per_utxo_byte",
+    );
+  }
+
+  if (
+    protocolParameters.coins_per_utxo_word !== undefined &&
+    protocolParameters.coins_per_utxo_word !== null
+  ) {
+    const wordValue = Number(protocolParameters.coins_per_utxo_word);
+    if (!Number.isFinite(wordValue)) {
+      throw new Error(
+        `Cardano protocol parameter coins_per_utxo_word is invalid: ${protocolParameters.coins_per_utxo_word}`,
+      );
+    }
+    return String(Math.round(wordValue / 8));
+  }
+
+  throw new Error(
+    "Missing Cardano protocol parameter coins_per_utxo_byte or coins_per_utxo_word.",
+  );
 }
 
 export async function getProtocolParameters() {
@@ -50,10 +94,19 @@ export async function getProtocolParameters() {
   );
 
   if (!response.ok) {
-    throw new Error("Unable to fetch Blockfrost protocol parameters.");
+    const errorText = await response.text();
+    throw new Error(
+      `Unable to fetch Blockfrost protocol parameters: ${response.status} ${response.statusText} ${errorText}`,
+    );
   }
 
-  return response.json();
+  const parameters = await response.json();
+
+  if (!parameters || typeof parameters !== "object") {
+    throw new Error("Blockfrost protocol response is invalid.");
+  }
+
+  return parameters;
 }
 
 export async function sendAdaTransaction({
@@ -71,6 +124,56 @@ export async function sendAdaTransaction({
   }
 
   const protocolParameters = await getProtocolParameters();
+  console.log("sendAdaTransaction: protocolParameters", protocolParameters);
+
+  if (!protocolParameters || typeof protocolParameters !== "object") {
+    throw new Error(
+      "Unable to load Cardano protocol parameters from Blockfrost.",
+    );
+  }
+
+  const CardanoWasmDynamic =
+    await import("@emurgo/cardano-serialization-lib-asmjs");
+  const {
+    Address: DynamicAddress,
+    TransactionBuilder,
+    TransactionBuilderConfigBuilder,
+    TransactionOutput,
+    TransactionUnspentOutput,
+    TransactionWitnessSet,
+    Transaction,
+    LinearFee,
+    BigNum,
+    Value,
+  } = CardanoWasmDynamic;
+
+  const requiredParams = [
+    "min_fee_a",
+    "min_fee_b",
+    "pool_deposit",
+    "key_deposit",
+    "max_val_size",
+    "max_tx_size",
+  ];
+
+  const missing = requiredParams.filter(
+    (key) =>
+      protocolParameters[key] === undefined || protocolParameters[key] === null,
+  );
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing Cardano protocol parameters from Blockfrost: ${missing.join(", ")}`,
+    );
+  }
+
+  try {
+    getCoinsPerUtxoByte(protocolParameters);
+  } catch (error) {
+    throw new Error(
+      `Missing Cardano protocol parameters from Blockfrost: ${error.message}`,
+    );
+  }
+
   const requestedAmount = Number(amount);
   if (!Number.isFinite(requestedAmount) || requestedAmount <= 0) {
     throw new Error("Enter a valid ADA amount greater than zero.");
@@ -79,24 +182,100 @@ export async function sendAdaTransaction({
   const lovelaceAmount = BigNum.from_str(
     Math.round(requestedAmount * 1000000).toString(),
   );
-  const txBuilderConfig = TransactionBuilderConfigBuilder.new()
-    .fee_algo(
-      LinearFee.new(
-        BigNum.from_str(protocolParameters.min_fee_a),
-        BigNum.from_str(protocolParameters.min_fee_b),
+
+  console.log("sendAdaTransaction: inputs", {
+    recipientAddress,
+    amount,
+    requestedAmount,
+    lovelaceAmount: lovelaceAmount.to_str?.() ?? "<unknown>",
+  });
+
+  const coinsPerUtxoByte = getCoinsPerUtxoByte(protocolParameters);
+  console.log("sendAdaTransaction: coinsPerUtxoByte", coinsPerUtxoByte);
+
+  const txBuilderConfigBuilder = TransactionBuilderConfigBuilder.new();
+  const txBuilderConfigAfterFee = txBuilderConfigBuilder.fee_algo(
+    LinearFee.new(
+      BigNum.from_str(
+        normalizeProtocolNumber(protocolParameters.min_fee_a, "min_fee_a"),
       ),
-    )
-    .pool_deposit(BigNum.from_str(protocolParameters.pool_deposit))
-    .key_deposit(BigNum.from_str(protocolParameters.key_deposit))
-    .max_value_size(protocolParameters.max_val_size)
-    .max_tx_size(protocolParameters.max_tx_size)
-    .coins_per_utxo_word(
-      BigNum.from_str(protocolParameters.coins_per_utxo_word),
-    )
-    .build();
+      BigNum.from_str(
+        normalizeProtocolNumber(protocolParameters.min_fee_b, "min_fee_b"),
+      ),
+    ),
+  );
+  console.log("sendAdaTransaction: after fee_algo", txBuilderConfigAfterFee);
+
+  const txBuilderConfigAfterPool = txBuilderConfigAfterFee.pool_deposit(
+    BigNum.from_str(
+      normalizeProtocolNumber(protocolParameters.pool_deposit, "pool_deposit"),
+    ),
+  );
+  console.log(
+    "sendAdaTransaction: after pool_deposit",
+    txBuilderConfigAfterPool,
+  );
+
+  const txBuilderConfigAfterKey = txBuilderConfigAfterPool.key_deposit(
+    BigNum.from_str(
+      normalizeProtocolNumber(protocolParameters.key_deposit, "key_deposit"),
+    ),
+  );
+  console.log("sendAdaTransaction: after key_deposit", txBuilderConfigAfterKey);
+
+  const txBuilderConfigAfterValue = txBuilderConfigAfterKey.max_value_size(
+    Number(
+      normalizeProtocolNumber(protocolParameters.max_val_size, "max_val_size"),
+    ),
+  );
+  console.log(
+    "sendAdaTransaction: after max_value_size",
+    txBuilderConfigAfterValue,
+  );
+
+  const txBuilderConfigAfterTx = txBuilderConfigAfterValue.max_tx_size(
+    Number(
+      normalizeProtocolNumber(protocolParameters.max_tx_size, "max_tx_size"),
+    ),
+  );
+  console.log("sendAdaTransaction: after max_tx_size", txBuilderConfigAfterTx);
+
+  const txBuilderConfigAfterCoins = txBuilderConfigAfterTx.coins_per_utxo_byte(
+    BigNum.from_str(coinsPerUtxoByte),
+  );
+  console.log(
+    "sendAdaTransaction: after coins_per_utxo_byte",
+    txBuilderConfigAfterCoins,
+  );
+
+  let txBuilderConfig;
+  try {
+    txBuilderConfig = txBuilderConfigAfterCoins.build();
+  } catch (innerError) {
+    console.error("sendAdaTransaction: build failed", innerError);
+    throw innerError;
+  }
+
+  console.log("sendAdaTransaction: txBuilderConfig created", txBuilderConfig);
 
   const txBuilder = TransactionBuilder.new(txBuilderConfig);
-  const recipient = Address.from_bech32(recipientAddress);
+
+  let recipient;
+  try {
+    const normalizedRecipient = normalizeAddress(
+      DynamicAddress,
+      recipientAddress,
+    );
+    console.log("sendAdaTransaction: normalizedRecipient", normalizedRecipient);
+    recipient = DynamicAddress.from_bech32(normalizedRecipient);
+  } catch (innerError) {
+    console.error("sendAdaTransaction: recipient address parse failed", {
+      recipientAddress,
+      innerError,
+    });
+    throw innerError;
+  }
+
   const output = TransactionOutput.new(recipient, Value.new(lovelaceAmount));
   txBuilder.add_output(output);
 
@@ -130,13 +309,15 @@ export async function sendAdaTransaction({
     );
   }
 
-  const changeBech32 =
+  const changeAddressValue =
     changeAddress || (await walletApi.getChangeAddress?.()) || "";
+  const changeBech32 = normalizeAddress(DynamicAddress, changeAddressValue);
+
   if (!changeBech32) {
     throw new Error("Unable to obtain a change address from the wallet.");
   }
 
-  txBuilder.add_change_if_needed(Address.from_bech32(changeBech32));
+  txBuilder.add_change_if_needed(DynamicAddress.from_bech32(changeBech32));
 
   const txBody = txBuilder.build();
   const txBodyHex = bytesToHex(txBody.to_bytes());
@@ -269,8 +450,15 @@ export async function connectCardanoWallet(preferredWallet = "nami") {
 
   const walletApi = await window.cardano[walletName].enable();
   const addresses = (await walletApi.getUsedAddresses?.()) ?? [];
-  const walletAddress =
+  const rawAddress =
     addresses[0] ?? (await walletApi.getChangeAddress?.()) ?? "";
+
+  const CardanoWasmDynamic =
+    await import("@emurgo/cardano-serialization-lib-asmjs");
+  const { Address: DynamicAddress } = CardanoWasmDynamic;
+  const walletAddress = rawAddress
+    ? normalizeAddress(DynamicAddress, rawAddress)
+    : "";
 
   return {
     walletName,

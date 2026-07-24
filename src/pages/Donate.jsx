@@ -81,11 +81,12 @@ function Donate() {
 
       const verification = await verifyDonationTransaction({
         txHash,
-        walletAddress: form.recipientAddress,
+        walletAddress: form.walletAddress,
         amount: form.amount,
       });
 
       if (!verification.verified) {
+        console.error("Donation verification failed:", verification);
         throw new Error(
           verification.message ||
             "The donation could not be verified on-chain.",
@@ -105,6 +106,7 @@ function Donate() {
       setMessage(`Donation of ${form.amount} ADA sent successfully: ${txHash}`);
       navigate("/dashboard");
     } catch (error) {
+      console.error("Donate error:", error);
       setMessage(error.message || "Unable to record donation.");
     } finally {
       setLoading(false);
