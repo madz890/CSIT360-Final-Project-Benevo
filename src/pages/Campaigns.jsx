@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { supabase } from "../supabaseClient";
@@ -7,18 +8,64 @@ function Campaigns() {
   const [filteredCampaigns, setFilteredCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+=======
+<<<<<<< Updated upstream
+function Campaigns() {
+  return <h1>Campaigns Page</h1>;
+=======
+import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
+import CampaignCard from "../components/CampaignCard";
+import "../styles/campaigns.css";
+
+function Campaigns() {
+  const [campaigns, setCampaigns] = useState([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const categories = [
+    "All",
+    "Education",
+    "Medical",
+    "Disaster Relief",
+    "Community",
+    "Environment",
+  ];
+>>>>>>> Stashed changes
 
   useEffect(() => {
     fetchCampaigns();
   }, []);
 
   useEffect(() => {
+<<<<<<< Updated upstream
     const filtered = campaigns.filter((campaign) =>
       campaign.title.toLowerCase().includes(search.toLowerCase())
     );
 
     setFilteredCampaigns(filtered);
   }, [search, campaigns]);
+=======
+    let filtered = campaigns;
+
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(
+        (campaign) => campaign.category === selectedCategory
+      );
+    }
+
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter((campaign) =>
+        campaign.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredCampaigns(filtered);
+  }, [campaigns, selectedCategory, searchTerm]);
+>>>>>>> Stashed changes
 
   async function fetchCampaigns() {
     setLoading(true);
@@ -26,6 +73,7 @@ function Campaigns() {
     const { data, error } = await supabase
       .from("campaigns")
       .select("*")
+<<<<<<< Updated upstream
       // .eq("status", "published")
       .order("created_at", { ascending: false });
 
@@ -33,11 +81,22 @@ function Campaigns() {
       console.error("Error fetching campaigns:", error.message);
     } else {
       setCampaigns(data);
+=======
+      //.eq("status", "active")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+    } else {
+      setCampaigns(data);
+      setFilteredCampaigns(data);
+>>>>>>> Stashed changes
     }
 
     setLoading(false);
   }
 
+<<<<<<< Updated upstream
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-xl">
@@ -171,6 +230,107 @@ function Campaigns() {
       </section>
     </div>
   );
+=======
+  return (
+    <main className="campaigns-page">
+
+{/* ================= HERO ================= */}
+
+      <section className="campaigns-hero">
+        <div className="container">
+
+          <span className="section-tag">
+            Explore Campaigns
+          </span>
+
+          <h1 className="campaigns-title">
+            Discover Verified Campaigns
+          </h1>
+
+          <p className="campaigns-description">
+            Find causes that inspire you and support them with secure, transparent
+            donations.
+          </p>
+
+          <div className="campaign-tools">
+
+            <input
+              type="text"
+              className="search-box"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            <div className="category-list">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className={
+                    selectedCategory === category
+                      ? "category-btn active"
+                      : "category-btn"
+                  }
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* CAMPAIGNS */}
+
+      <section className="campaigns-section">
+
+        <div className="container">
+
+          <div className="campaign-header">
+
+            <h2>
+              Active Campaigns
+            </h2>
+
+            <p>
+              {filteredCampaigns.length} campaign
+              {filteredCampaigns.length !== 1 && "s"} found
+            </p>
+
+          </div>
+
+          {loading ? (
+            <p className="loading">
+              Loading campaigns...
+            </p>
+          ) : filteredCampaigns.length === 0 ? (
+            <p className="loading">
+              No campaigns found.
+            </p>
+          ) : (
+            <div className="campaign-grid">
+
+              {filteredCampaigns.map((campaign) => (
+                <CampaignCard
+                  key={campaign.id}
+                  campaign={campaign}
+                />
+              ))}
+
+            </div>
+          )}
+
+        </div>
+
+      </section>
+
+    </main>
+  );
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 
 export default Campaigns;
