@@ -1,22 +1,74 @@
-import { Link } from "react-router-dom";
 import "../styles/navbar.css";
+import { Heart } from "lucide-react";
 
-function Navbar() {
+export default function Navbar() {
   return (
-    <nav className="navbar">
-      <h2 className="logo">ADAid</h2>
+    <header className="navbar-wrapper">
 
-      <ul className="nav-links">
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/campaigns">Campaigns</Link></li>
-        <li><Link to="/dashboard">Dashboard</Link></li>
-      </ul>
+      <div className="navbar">
 
-      <button className="wallet-btn">
-        Connect Wallet
-      </button>
-    </nav>
+        {/* Logo */}
+
+        <div className="logo">
+
+          <div className="logo-icon">
+            <Heart fill="white" size={18} />
+          </div>
+
+          <h2>Benevo</h2>
+
+        </div>
+
+        {/* Navigation */}
+
+        <nav>
+
+          <ul className="nav-links">
+
+            <li>
+              <a className="active" href="#">
+                Home
+              </a>
+            </li>
+
+            <li>
+              <a href="#">
+                Campaigns
+              </a>
+            </li>
+
+            <li>
+              <a href="#">
+                About
+              </a>
+            </li>
+
+            <li>
+              <a href="#">
+                Contact
+              </a>
+            </li>
+
+          </ul>
+
+        </nav>
+
+        {/* Right Side */}
+
+        <div className="nav-right">
+
+          <button className="login-btn">
+            Login
+          </button>
+
+          <button className="donate-btn">
+            Start Campaign
+          </button>
+
+        </div>
+
+      </div>
+
+    </header>
   );
 }
-
-export default Navbar;
