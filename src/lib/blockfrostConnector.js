@@ -1,7 +1,32 @@
-const BLOCKFROST_BASE_URL = "https://cardano-mainnet.blockfrost.io/api/v0";
-const BLOCKFROST_PROJECT_ID =
-  import.meta.env.VITE_BLOCKFROST_PROJECT_ID ||
-  "mainnetm3TwGjqcjqTPeNuex194tvX0KYNsl5jf";
+const BLOCKFROST_BASE_URL = "https://cardano-preprod.blockfrost.io/api/v0";
+const BLOCKFROST_PROJECT_ID = import.meta.env.VITE_BLOCKFROST_PROJECT_ID || "";
+
+let CSL_INSTANCE = null;
+
+async function getCSL() {
+  if (!CSL_INSTANCE) {
+    try {
+      const WASM = await import("@emurgo/cardano-serialization-lib-browser");
+      if (typeof WASM.default === "function") {
+        const initialized = await WASM.default();
+        CSL_INSTANCE =
+          initialized && Object.keys(initialized).length > 0
+            ? initialized
+            : WASM;
+      } else {
+        CSL_INSTANCE = WASM;
+      }
+    } catch (browserError) {
+      console.warn(
+        "getCSL: @emurgo/cardano-serialization-lib-browser failed, falling back to asmjs",
+        browserError,
+      );
+      const ASMJS = await import("@emurgo/cardano-serialization-lib-asmjs");
+      CSL_INSTANCE = ASMJS;
+    }
+  }
+  return CSL_INSTANCE;
+}
 
 function hexToBytes(hex) {
   if (!hex) {
@@ -123,6 +148,8 @@ export async function sendAdaTransaction({
     throw new Error("A recipient address is required for the transaction.");
   }
 
+  const CSL = await getCSL();
+
   const protocolParameters = await getProtocolParameters();
   console.log("sendAdaTransaction: protocolParameters", protocolParameters);
 
@@ -131,21 +158,6 @@ export async function sendAdaTransaction({
       "Unable to load Cardano protocol parameters from Blockfrost.",
     );
   }
-
-  const CardanoWasmDynamic =
-    await import("@emurgo/cardano-serialization-lib-asmjs");
-  const {
-    Address: DynamicAddress,
-    TransactionBuilder,
-    TransactionBuilderConfigBuilder,
-    TransactionOutput,
-    TransactionUnspentOutput,
-    TransactionWitnessSet,
-    Transaction,
-    LinearFee,
-    BigNum,
-    Value,
-  } = CardanoWasmDynamic;
 
   const requiredParams = [
     "min_fee_a",
@@ -166,108 +178,75 @@ export async function sendAdaTransaction({
     );
   }
 
-  try {
-    getCoinsPerUtxoByte(protocolParameters);
-  } catch (error) {
-    throw new Error(
-      `Missing Cardano protocol parameters from Blockfrost: ${error.message}`,
-    );
-  }
-
   const requestedAmount = Number(amount);
   if (!Number.isFinite(requestedAmount) || requestedAmount <= 0) {
     throw new Error("Enter a valid ADA amount greater than zero.");
   }
 
-  const lovelaceAmount = BigNum.from_str(
+  const lovelaceAmount = CSL.BigNum.from_str(
     Math.round(requestedAmount * 1000000).toString(),
   );
 
-  console.log("sendAdaTransaction: inputs", {
-    recipientAddress,
-    amount,
-    requestedAmount,
-    lovelaceAmount: lovelaceAmount.to_str?.() ?? "<unknown>",
-  });
-
   const coinsPerUtxoByte = getCoinsPerUtxoByte(protocolParameters);
-  console.log("sendAdaTransaction: coinsPerUtxoByte", coinsPerUtxoByte);
-
-  const txBuilderConfigBuilder = TransactionBuilderConfigBuilder.new();
-  const txBuilderConfigAfterFee = txBuilderConfigBuilder.fee_algo(
-    LinearFee.new(
-      BigNum.from_str(
-        normalizeProtocolNumber(protocolParameters.min_fee_a, "min_fee_a"),
-      ),
-      BigNum.from_str(
-        normalizeProtocolNumber(protocolParameters.min_fee_b, "min_fee_b"),
-      ),
-    ),
-  );
-  console.log("sendAdaTransaction: after fee_algo", txBuilderConfigAfterFee);
-
-  const txBuilderConfigAfterPool = txBuilderConfigAfterFee.pool_deposit(
-    BigNum.from_str(
-      normalizeProtocolNumber(protocolParameters.pool_deposit, "pool_deposit"),
-    ),
-  );
-  console.log(
-    "sendAdaTransaction: after pool_deposit",
-    txBuilderConfigAfterPool,
-  );
-
-  const txBuilderConfigAfterKey = txBuilderConfigAfterPool.key_deposit(
-    BigNum.from_str(
-      normalizeProtocolNumber(protocolParameters.key_deposit, "key_deposit"),
-    ),
-  );
-  console.log("sendAdaTransaction: after key_deposit", txBuilderConfigAfterKey);
-
-  const txBuilderConfigAfterValue = txBuilderConfigAfterKey.max_value_size(
-    Number(
-      normalizeProtocolNumber(protocolParameters.max_val_size, "max_val_size"),
-    ),
-  );
-  console.log(
-    "sendAdaTransaction: after max_value_size",
-    txBuilderConfigAfterValue,
-  );
-
-  const txBuilderConfigAfterTx = txBuilderConfigAfterValue.max_tx_size(
-    Number(
-      normalizeProtocolNumber(protocolParameters.max_tx_size, "max_tx_size"),
-    ),
-  );
-  console.log("sendAdaTransaction: after max_tx_size", txBuilderConfigAfterTx);
-
-  const txBuilderConfigAfterCoins = txBuilderConfigAfterTx.coins_per_utxo_byte(
-    BigNum.from_str(coinsPerUtxoByte),
-  );
-  console.log(
-    "sendAdaTransaction: after coins_per_utxo_byte",
-    txBuilderConfigAfterCoins,
-  );
 
   let txBuilderConfig;
   try {
-    txBuilderConfig = txBuilderConfigAfterCoins.build();
+    txBuilderConfig = CSL.TransactionBuilderConfigBuilder.new()
+      .fee_algo(
+        CSL.LinearFee.new(
+          CSL.BigNum.from_str(
+            normalizeProtocolNumber(protocolParameters.min_fee_a, "min_fee_a"),
+          ),
+          CSL.BigNum.from_str(
+            normalizeProtocolNumber(protocolParameters.min_fee_b, "min_fee_b"),
+          ),
+        ),
+      )
+      .pool_deposit(
+        CSL.BigNum.from_str(
+          normalizeProtocolNumber(
+            protocolParameters.pool_deposit,
+            "pool_deposit",
+          ),
+        ),
+      )
+      .key_deposit(
+        CSL.BigNum.from_str(
+          normalizeProtocolNumber(
+            protocolParameters.key_deposit,
+            "key_deposit",
+          ),
+        ),
+      )
+      .max_value_size(
+        Number(
+          normalizeProtocolNumber(
+            protocolParameters.max_val_size,
+            "max_val_size",
+          ),
+        ),
+      )
+      .max_tx_size(
+        Number(
+          normalizeProtocolNumber(
+            protocolParameters.max_tx_size,
+            "max_tx_size",
+          ),
+        ),
+      )
+      .coins_per_utxo_byte(CSL.BigNum.from_str(coinsPerUtxoByte))
+      .build();
   } catch (innerError) {
     console.error("sendAdaTransaction: build failed", innerError);
     throw innerError;
   }
 
-  console.log("sendAdaTransaction: txBuilderConfig created", txBuilderConfig);
-
-  const txBuilder = TransactionBuilder.new(txBuilderConfig);
+  const txBuilder = CSL.TransactionBuilder.new(txBuilderConfig);
 
   let recipient;
   try {
-    const normalizedRecipient = normalizeAddress(
-      DynamicAddress,
-      recipientAddress,
-    );
-    console.log("sendAdaTransaction: normalizedRecipient", normalizedRecipient);
-    recipient = DynamicAddress.from_bech32(normalizedRecipient);
+    const normalizedRecipient = normalizeAddress(CSL.Address, recipientAddress);
+    recipient = CSL.Address.from_bech32(normalizedRecipient);
   } catch (innerError) {
     console.error("sendAdaTransaction: recipient address parse failed", {
       recipientAddress,
@@ -276,55 +255,63 @@ export async function sendAdaTransaction({
     throw innerError;
   }
 
-  const output = TransactionOutput.new(recipient, Value.new(lovelaceAmount));
+  const output = CSL.TransactionOutput.new(
+    recipient,
+    CSL.Value.new(lovelaceAmount),
+  );
   txBuilder.add_output(output);
 
   const utxos = (await walletApi.getUtxos?.()) ?? [];
   if (!Array.isArray(utxos) || utxos.length === 0) {
     throw new Error(
-      "Your connected wallet does not have any available ADA UTXOs. Please fund the wallet with mainnet ADA and try again.",
+      "Your connected wallet does not have any available ADA UTXOs. Please fund the wallet with testnet ADA and try again.",
     );
   }
+
+  const txInputs = CSL.TransactionUnspentOutputs.new();
 
   for (const utxoHex of utxos) {
     if (typeof utxoHex !== "string" || utxoHex.length === 0) {
-      throw new Error(
-        "Unable to parse wallet UTXOs. Make sure the wallet is connected and on Cardano mainnet.",
-      );
+      continue;
     }
 
-    let utxo;
     try {
-      utxo = TransactionUnspentOutput.from_bytes(hexToBytes(utxoHex));
+      const utxo = CSL.TransactionUnspentOutput.from_bytes(hexToBytes(utxoHex));
+      txInputs.add(utxo);
     } catch (error) {
-      throw new Error(
-        "Unable to decode wallet UTXO data. Please reconnect the wallet and ensure it supports the Cardano API.",
-      );
+      console.warn("Failed to decode UTXO:", error);
     }
-
-    txBuilder.add_input(
-      utxo.output().address(),
-      utxo.input(),
-      utxo.output().amount(),
-    );
   }
+
+  if (txInputs.len() === 0) {
+    throw new Error("No valid UTXOs found in the connected wallet.");
+  }
+
+  txBuilder.add_inputs_from(
+    txInputs,
+    CSL.CoinSelectionStrategyCIP2.LargestFirst,
+  );
 
   const changeAddressValue =
     changeAddress || (await walletApi.getChangeAddress?.()) || "";
-  const changeBech32 = normalizeAddress(DynamicAddress, changeAddressValue);
+  const changeBech32 = normalizeAddress(CSL.Address, changeAddressValue);
 
   if (!changeBech32) {
     throw new Error("Unable to obtain a change address from the wallet.");
   }
 
-  txBuilder.add_change_if_needed(DynamicAddress.from_bech32(changeBech32));
+  txBuilder.add_change_if_needed(CSL.Address.from_bech32(changeBech32));
 
   const txBody = txBuilder.build();
-  const txBodyHex = bytesToHex(txBody.to_bytes());
+  const dummyWitnessSet = CSL.TransactionWitnessSet.new();
+  const txToSign = CSL.Transaction.new(txBody, dummyWitnessSet);
+  const txHex = bytesToHex(txToSign.to_bytes());
 
-  const witnessHex = await walletApi.signTx(txBodyHex, true);
-  const witnessSet = TransactionWitnessSet.from_bytes(hexToBytes(witnessHex));
-  const signedTx = Transaction.new(txBody, witnessSet);
+  const witnessHex = await walletApi.signTx(txHex, true);
+  const witnessSet = CSL.TransactionWitnessSet.from_bytes(
+    hexToBytes(witnessHex),
+  );
+  const signedTx = CSL.Transaction.new(txBody, witnessSet);
   const signedTxHex = bytesToHex(signedTx.to_bytes());
 
   if (typeof walletApi.submitTx === "function") {
@@ -334,7 +321,10 @@ export async function sendAdaTransaction({
 
   const response = await fetch(`${BLOCKFROST_BASE_URL}/tx/submit`, {
     method: "POST",
-    headers: getBlockfrostHeaders(),
+    headers: {
+      project_id: BLOCKFROST_PROJECT_ID,
+      "Content-Type": "application/cbor",
+    },
     body: hexToBytes(signedTxHex),
   });
 
@@ -343,8 +333,30 @@ export async function sendAdaTransaction({
     throw new Error(`Unable to submit transaction to Blockfrost: ${errorText}`);
   }
 
-  const txHash = await response.text();
+  const txHash = await response.json();
   return { txHash, signedTxHex };
+}
+
+async function fetchBlockfrostTransactionUtxos(txHash) {
+  const response = await fetch(
+    `${BLOCKFROST_BASE_URL}/txs/${encodeURIComponent(txHash)}/utxos`,
+    {
+      headers: getBlockfrostHeaders(),
+    },
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Unable to verify the donation transaction with Blockfrost: ${response.status} ${response.statusText} ${errorText}`,
+    );
+  }
+
+  return await response.json();
 }
 
 export async function verifyDonationTransaction({
@@ -371,21 +383,35 @@ export async function verifyDonationTransaction({
     ? Math.round(requestedAmount * 1000000)
     : 0;
 
-  const response = await fetch(
-    `${BLOCKFROST_BASE_URL}/txs/${encodeURIComponent(txHash)}`,
-    {
-      headers: getBlockfrostHeaders(),
-    },
-  );
+  let utxoData = null;
+  const maxAttempts = 18;
+  const delayMs = 5000;
 
-  if (!response.ok) {
-    throw new Error(
-      "Unable to verify the donation transaction with Blockfrost.",
-    );
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    utxoData = await fetchBlockfrostTransactionUtxos(txHash);
+
+    if (utxoData) {
+      break;
+    }
+
+    if (attempt === maxAttempts) {
+      break;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
-  const transaction = await response.json();
-  const outputs = Array.isArray(transaction.outputs) ? transaction.outputs : [];
+  if (!utxoData) {
+    return {
+      verified: false,
+      txHash,
+      amountLovelace: null,
+      message:
+        "The transaction was submitted but is still waiting to be confirmed on Preprod. Please wait up to 90 seconds and try verification again.",
+    };
+  }
+
+  const outputs = Array.isArray(utxoData.outputs) ? utxoData.outputs : [];
 
   const matchingOutput = outputs.find((output) => {
     if (output.address !== walletAddress) {
@@ -431,6 +457,26 @@ export function getInstalledWallets() {
     .map(([name]) => name);
 }
 
+export async function getFreshWalletApi(preferredWallet = "nami") {
+  if (typeof window === "undefined" || !window.cardano) {
+    throw new Error(
+      "No Cardano wallet extension was detected in this browser.",
+    );
+  }
+
+  const installedWallets = getInstalledWallets();
+  const preferredName = preferredWallet?.toLowerCase();
+  const walletName = installedWallets.includes(preferredName)
+    ? preferredName
+    : installedWallets[0];
+
+  if (!walletName || !window.cardano[walletName]) {
+    throw new Error("The selected wallet is not installed or available.");
+  }
+
+  return await window.cardano[walletName].enable();
+}
+
 export async function connectCardanoWallet(preferredWallet = "nami") {
   if (typeof window === "undefined" || !window.cardano) {
     throw new Error(
@@ -448,16 +494,14 @@ export async function connectCardanoWallet(preferredWallet = "nami") {
     throw new Error("The selected wallet is not installed or available.");
   }
 
-  const walletApi = await window.cardano[walletName].enable();
+  const walletApi = await getFreshWalletApi(walletName);
   const addresses = (await walletApi.getUsedAddresses?.()) ?? [];
   const rawAddress =
     addresses[0] ?? (await walletApi.getChangeAddress?.()) ?? "";
 
-  const CardanoWasmDynamic =
-    await import("@emurgo/cardano-serialization-lib-asmjs");
-  const { Address: DynamicAddress } = CardanoWasmDynamic;
+  const CSL = await getCSL();
   const walletAddress = rawAddress
-    ? normalizeAddress(DynamicAddress, rawAddress)
+    ? normalizeAddress(CSL.Address, rawAddress)
     : "";
 
   return {

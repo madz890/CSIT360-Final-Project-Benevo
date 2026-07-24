@@ -5,6 +5,7 @@ import { createDonation, updateWalletAddress } from "../lib/donationService";
 import {
   sendAdaTransaction,
   verifyDonationTransaction,
+  getFreshWalletApi,
 } from "../lib/blockfrostConnector";
 import useCardanoWallet from "../hooks/useCardanoWallet";
 import useFormState from "../hooks/useFormState";
@@ -59,6 +60,11 @@ function Donate() {
       return;
     }
 
+    if (!walletName) {
+      setMessage("Connect your wallet before sending the transaction.");
+      return;
+    }
+
     if (!form.walletAddress) {
       setMessage("Connect a wallet to fill in your address.");
       return;
@@ -73,8 +79,9 @@ function Donate() {
     setMessage("");
 
     try {
+      const activeWalletApi = await getFreshWalletApi(walletName);
       const { txHash } = await sendAdaTransaction({
-        walletApi,
+        walletApi: activeWalletApi,
         recipientAddress: form.recipientAddress,
         amount: form.amount,
       });
@@ -107,7 +114,10 @@ function Donate() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Donate error:", error);
-      setMessage(error.message || "Unable to record donation.");
+      setMessage(
+        error?.message ||
+          "Unable to record donation. Try reconnecting your wallet and submitting again.",
+      );
     } finally {
       setLoading(false);
     }
