@@ -1,0 +1,64 @@
+.dashboard-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-top: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.card h2,
+.card h3 {
+  margin-bottom: 12px;
+  color: #0d47a1;
+}
+
+.card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card button,
+.card a.button-link {
+  margin-top: 8px;
+  display: inline-block;
+  padding: 8px 12px;
+  background: #0d47a1;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.campaign-list {
+  display: grid;
+  gap: 16px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e3f2fd;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #0d47a1, #42a5f5);
+}
