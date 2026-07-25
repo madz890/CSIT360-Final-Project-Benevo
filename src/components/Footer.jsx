@@ -1,4 +1,5 @@
-import { Heart, Mail } from "lucide-react";
+import { Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 import "../styles/footer.css";
 
 function Footer() {
@@ -8,30 +9,15 @@ function Footer() {
         <div className="footer-brand">
           <div className="footer-logo"><Heart size={18} fill="currentColor" /> <strong>Benevo</strong></div>
           <p>A transparent donation platform connecting generous people with verified causes that truly matter.</p>
-          <div className="footer-socials" aria-label="Social links">
-            <button type="button" aria-label="Facebook">f</button>
-            <button type="button" aria-label="Instagram">i</button>
-            <button type="button" aria-label="LinkedIn">in</button>
-            <button type="button" aria-label="Email"><Mail size={15} /></button>
-          </div>
         </div>
 
         <div className="footer-links">
           <h3>Quick Links</h3>
-          <a href="/campaigns">Campaigns</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-          <a href="#faq">FAQ</a>
-          <a href="#privacy">Privacy Policy</a>
-        </div>
-
-        <div className="footer-links">
-          <h3>Platform</h3>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#verification">Verification</a>
-          <a href="#transparency">Transparency Report</a>
-          <a href="#blog">Blog</a>
-          <a href="#partners">Partners</a>
+          <Link to="/">Home</Link>
+          <Link to="/campaigns">Campaigns</Link>
+          <Link to="/create-campaign">Create campaign</Link>
+          <Link to="/donate">Donate</Link>
+          <Link to="/dashboard">Dashboard</Link>
         </div>
       </div>
       <div className="container footer-bottom">
