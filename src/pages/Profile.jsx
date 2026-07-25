@@ -1,5 +1,7 @@
+import Footer from "../components/Footer";
+
 function Profile() {
-  return <h1>Profile Page</h1>;
+  return <><main className="details-state"><h1>Profile Page</h1></main><Footer /></>;
 }
 
 export default Profile;

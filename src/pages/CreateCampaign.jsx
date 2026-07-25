@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { createCampaign } from "../lib/campaignService";
 import useFormState from "../hooks/useFormState";
+import Footer from "../components/Footer";
 
 function CreateCampaign() {
   const { user } = useAuth();
@@ -37,9 +38,10 @@ function CreateCampaign() {
   };
 
   return (
-    <div className="card">
-      <h2>Create a campaign</h2>
-      <form onSubmit={handleSubmit}>
+    <>
+      <main className="create-campaign-page card">
+        <h2>Create a campaign</h2>
+        <form onSubmit={handleSubmit}>
         <label>
           Title
           <input
@@ -88,9 +90,11 @@ function CreateCampaign() {
         <button type="submit" disabled={loading}>
           {loading ? "Creating..." : "Create campaign"}
         </button>
-      </form>
-      {message ? <p className="message">{message}</p> : null}
-    </div>
+        </form>
+        {message ? <p className="message">{message}</p> : null}
+      </main>
+      <Footer />
+    </>
   );
 }
 

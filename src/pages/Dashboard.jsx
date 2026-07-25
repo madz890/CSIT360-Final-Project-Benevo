@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchUserDonations } from "../lib/donationService";
+import Footer from "../components/Footer";
 import "../styles/dashboard.css";
 
 function Dashboard() {
@@ -14,8 +15,9 @@ function Dashboard() {
   }, [user]);
 
   return (
-    <div className="dashboard-grid">
-      <div className="card">
+    <>
+      <main className="dashboard-grid">
+        <div className="card">
         <h2>Dashboard</h2>
         <p>Welcome back, {profile?.full_name || user?.email || "donor"}.</p>
         <p>Role: {profile?.role || "donor"}</p>
@@ -23,8 +25,8 @@ function Dashboard() {
         <Link className="button-link" to="/create-campaign">
           Create campaign
         </Link>
-      </div>
-      <div className="card">
+        </div>
+        <div className="card">
         <h3>Your donation history</h3>
         {donations.length === 0 ? (
           <p>No donations recorded yet.</p>
@@ -40,8 +42,10 @@ function Dashboard() {
             ))}
           </ul>
         )}
-      </div>
-    </div>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }
 

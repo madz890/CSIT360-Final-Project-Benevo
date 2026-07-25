@@ -454,7 +454,7 @@ const featuredCampaigns = selectedCategory === "All"
 
       </section>
 
-// CTA
+{/* CTA */}
 
       <section className="cta">
 

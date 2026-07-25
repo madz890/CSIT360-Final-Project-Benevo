@@ -36,17 +36,17 @@ function Navbar() {
               </NavLink>
             </li>
 
+            <li>
+              <NavLink
+                to="/campaigns"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                Campaigns
+              </NavLink>
+            </li>
+
             {user && (
               <>
-                <li>
-                  <NavLink
-                    to="/campaigns"
-                    className={({ isActive }) => (isActive ? "active" : "")}
-                  >
-                    Campaigns
-                  </NavLink>
-                </li>
-
                 <li>
                   <NavLink
                     to="/dashboard"

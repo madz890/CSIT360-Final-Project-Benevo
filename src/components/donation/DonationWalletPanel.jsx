@@ -8,16 +8,17 @@ export default function DonationWalletPanel({
 }) {
   return (
     <section className="wallet-panel">
-      <p>{walletStatus}</p>
+      <p className="wallet-status">{walletStatus}</p>
       {availableWallets.length > 0 ? (
-        <p>Detected wallets: {availableWallets.join(", ")}</p>
+        <p className="wallet-copy">Detected wallets: {availableWallets.join(", ")}</p>
       ) : (
-        <p>
+        <p className="wallet-copy">
           No Cardano wallet extension was detected. Install Nami, Eternl, or
           Lace to connect.
         </p>
       )}
       <button
+        className="secondary-btn wallet-connect-btn"
         type="button"
         onClick={onConnectWallet}
         disabled={walletConnecting}
