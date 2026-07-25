@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { fetchCampaigns } from "../lib/campaignService";
+import { getCampaignsDonationTotals } from "../lib/donationService";
 import CampaignCard from "../components/CampaignCard";
 import Footer from "../components/Footer";
 import "../styles/campaigns.css";
@@ -13,7 +14,16 @@ function Campaigns() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchCampaigns().then(setCampaigns);
+    let cancelled = false;
+    (async () => {
+      const list = await fetchCampaigns();
+      const ids = list.map((c) => c.id).filter(Boolean);
+      let totals = {};
+      try { totals = await getCampaignsDonationTotals(ids); } catch (_) {}
+      if (cancelled) return;
+      setCampaigns(list.map((c) => ({ ...c, _donationsSum: totals[c.id] || 0 })));
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const categories = ["All", "Education", "Healthcare", "Environment", "Emergency", "Animals"];
