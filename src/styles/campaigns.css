@@ -1,0 +1,22 @@
+.campaigns-page { min-height: 100vh; padding-top: 168px; background: var(--background); }
+.campaigns-hero { padding: 0 0 58px; text-align: center; }
+.campaigns-hero h1 { font-size: clamp(42px, 5vw, 58px); font-weight: 800; letter-spacing: -0.04em; }
+.campaigns-hero p { margin-top: 12px; color: var(--text); font-size: clamp(17px, 2vw, 22px); }
+.campaigns-content { max-width: 1120px; padding-bottom: 90px; }
+.campaigns-toolbar { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: 0 8px 20px rgba(0, 0, 0, .04); }
+.campaign-search { display: flex; align-items: center; gap: 12px; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--primary-light) 40%, var(--border)); border-radius: var(--radius-sm); color: var(--text); background: var(--surface-alt); }
+.campaign-search input { padding: 12px 0; border: 0; background: transparent; box-shadow: none; }
+.campaign-search input:focus { box-shadow: none; }
+.campaigns-page .campaign-filter { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 30px 0 36px; }
+.campaigns-page .campaign-filter button { padding: 10px 22px; border: 1px solid var(--border); background: var(--surface); color: var(--text); box-shadow: 0 5px 12px rgba(0, 0, 0, .03); }
+.campaigns-page .campaign-filter button.active { border-color: var(--primary-dark); background: var(--primary-dark); color: var(--surface); }
+.campaign-count { margin-bottom: 22px; color: var(--text); }
+.campaigns-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.campaigns-grid .campaign-image img { height: 200px; }
+.campaigns-grid .campaign-body { padding: 20px; }
+.campaigns-grid .campaign-body h3 { min-height: 48px; font-size: 16px; }
+.campaigns-grid .campaign-body > p { display: -webkit-box; min-height: 68px; margin-bottom: 18px; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 13px; }
+.campaigns-grid .campaign-footer { margin: 18px 0; font-size: 13px; }
+.campaign-empty { padding: 56px 20px; color: var(--text); text-align: center; }
+@media (max-width: 900px) { .campaigns-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .campaigns-page { padding-top: 108px; } .campaigns-page .campaign-filter { gap: 10px; margin-bottom: 28px; } .campaigns-page .campaign-filter button { padding: 9px 16px; } .campaigns-grid { grid-template-columns: 1fr; } }
