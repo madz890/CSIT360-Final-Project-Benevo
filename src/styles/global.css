@@ -1,17 +1,337 @@
+/* ===================================================
+                    GOOGLE FONT
+=================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
+
+/* Existing page styles */
 @import "./auth.css";
 @import "./dashboard.css";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
+/* ===================================================
+                    DESIGN SYSTEM
+=================================================== */
+
+:root {
+
+  /* Brand Colors */
+
+  --primary: #F97316;
+  --primary-dark: #EA580C;
+  --primary-light: #FDBA74;
+
+  /* Background */
+
+  --background: #FFF4E8;
+  --surface: #FFFFFF;
+  --surface-alt: #FFF8F1;
+
+  /* Text */
+
+  --dark: #312922;
+  --text: #6B7280;
+  --text-light: #9CA3AF;
+
+  /* Borders */
+
+  --border: #ECECEC;
+
+  /* Status */
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  /* Radius */
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 30px;
+
+  /* Shadow */
+
+  --shadow: 0 15px 40px rgba(0,0,0,.08);
+
+  /* Transition */
+
+  --transition: .3s ease;
+
 }
 
-body {
-  background-color: #f5f7fa;
+/* ===================================================
+                    RESET
+=================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-#root {
-  min-height: 100vh;
+html{
+    scroll-behavior:smooth;
 }
+
+body{
+
+    font-family:"Plus Jakarta Sans",sans-serif;
+
+    background:var(--background);
+
+    color:var(--dark);
+
+    line-height:1.6;
+
+}
+
+#root{
+    min-height:100vh;
+}
+
+img{
+    display:block;
+    width:100%;
+}
+
+a{
+
+    color:inherit;
+
+    text-decoration:none;
+
+}
+
+ul{
+
+    list-style:none;
+
+}
+
+button{
+
+    font:inherit;
+
+    cursor:pointer;
+
+    border:none;
+
+    outline:none;
+
+}
+
+input,
+textarea,
+select{
+
+    font:inherit;
+
+    outline:none;
+
+}
+
+/* ===================================================
+                    LAYOUT
+=================================================== */
+
+.container{
+
+    width:min(1300px,90%);
+
+    margin:auto;
+
+}
+
+/* ===================================================
+                    TYPOGRAPHY
+=================================================== */
+
+h1,
+h2,
+h3,
+h4{
+
+    color:var(--dark);
+
+    line-height:1.2;
+
+}
+
+.section-title{
+
+    font-size:44px;
+
+    font-weight:800;
+
+}
+
+.section-subtitle{
+
+    color:var(--primary);
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    margin-bottom:10px;
+
+}
+
+.section-text{
+
+    color:var(--text);
+
+    font-size:17px;
+
+    line-height:1.8;
+
+}
+
+/* ===================================================
+                    BUTTONS
+=================================================== */
+
+.primary-btn{
+
+    background:var(--primary);
+
+    color:white;
+
+    border-radius:999px;
+
+    padding:15px 32px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:var(--transition);
+
+}
+
+.primary-btn:hover{
+
+    background:var(--primary-dark);
+
+    transform:translateY(-2px);
+
+}
+
+.secondary-btn{
+
+    background:white;
+
+    color:var(--primary);
+
+    border:2px solid var(--primary);
+
+    border-radius:999px;
+
+    padding:15px 32px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:var(--transition);
+
+}
+
+.secondary-btn:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+/* ===================================================
+                    CARDS
+=================================================== */
+
+.card{
+
+    background:var(--surface);
+
+    border-radius:var(--radius-md);
+
+    box-shadow:var(--shadow);
+
+}
+
+/* ===================================================
+                FORM ELEMENTS
+=================================================== */
+
+input,
+textarea,
+select{
+
+    width:100%;
+
+    padding:14px 18px;
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius-sm);
+
+    background:white;
+
+    transition:var(--transition);
+
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 3px rgba(249,115,22,.15);
+
+}
+
+/* ===================================================
+                    UTILITIES
+=================================================== */
+
+.text-center{
+
+    text-align:center;
+
+}
+
+.text-primary{
+
+    color:var(--primary);
+
+}
+
+.text-muted{
+
+    color:var(--text);
+
+}
+
+.shadow{
+
+    box-shadow:var(--shadow);
+
+}
+
+.rounded{
+
+    border-radius:var(--radius-md);
+
+}
+
+.mt-1{margin-top:10px;}
+.mt-2{margin-top:20px;}
+.mt-3{margin-top:30px;}
+.mt-4{margin-top:40px;}
+
+.mb-1{margin-bottom:10px;}
+.mb-2{margin-bottom:20px;}
+.mb-3{margin-bottom:30px;}
+.mb-4{margin-bottom:40px;}

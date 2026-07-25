@@ -1,0 +1,58 @@
+.campaign-card {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.06);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.campaign-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+}
+
+.campaign-image { position: relative; }
+
+.campaign-image img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+}
+
+.campaign-category {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campaign-body { padding: 22px; }
+.campaign-body h3 { margin-bottom: 16px; font-size: 20px; }
+.campaign-body > p { margin-bottom: 28px; color: var(--text); line-height: 1.7; }
+
+.progress-text, .campaign-footer { display: flex; justify-content: space-between; align-items: center; }
+.progress-text { margin-bottom: 12px; font-size: 15px; font-weight: 600; }
+.progress-text span:first-child, .campaign-footer strong { color: var(--primary); }
+
+.campaign-card .progress-bar {
+  height: 12px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-light) 45%, var(--surface));
+}
+
+.campaign-card .progress-fill { height: 100%; border-radius: inherit; background: var(--primary); }
+.campaign-footer { margin: 24px 0; }
+.campaign-days { display: flex; align-items: center; gap: 8px; color: var(--text); }
+.campaign-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.campaign-btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; font-size: 14px; }
+.campaign-details-btn { border-width: 2px; }
+
+@media (max-width: 480px) { .campaign-body { padding: 20px; } }
