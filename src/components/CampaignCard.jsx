@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import "../styles/campaignCard.css";
 
 function CampaignCard({ campaign, onDonate }) {
-  const currentAmount = Number(campaign.current_amount) || 0;
+  const storedAmount = Number(campaign.current_amount) || 0;
+  const donationsSum = Number(campaign._donationsSum) || 0;
+  const currentAmount = Math.max(storedAmount, donationsSum);
   const goalAmount = Number(campaign.goal_amount) || 0;
   const progress =
     goalAmount > 0 ? Math.min(Math.round((currentAmount / goalAmount) * 100), 100) : 0;

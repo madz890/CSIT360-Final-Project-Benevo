@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { fetchCampaigns } from "../lib/campaignService";
+import { getCampaignsDonationTotals } from "../lib/donationService";
 import CampaignCard from "../components/CampaignCard";
 import Footer from "../components/Footer";
 
@@ -21,9 +22,17 @@ const [selectedCategory, setSelectedCategory] = useState("All");
 const navigate = useNavigate();
 
 useEffect(() => {
-  fetchCampaigns().then((data) => {
-    setCampaigns(data.slice(0, 3)); // only show 3 feat campaigns
-  });
+  let cancelled = false;
+  (async () => {
+    const list = await fetchCampaigns();
+    const featured = list.slice(0, 3);
+    const ids = featured.map((c) => c.id).filter(Boolean);
+    let totals = {};
+    try { totals = await getCampaignsDonationTotals(ids); } catch (_) {}
+    if (cancelled) return;
+    setCampaigns(featured.map((c) => ({ ...c, _donationsSum: totals[c.id] || 0 })));
+  })();
+  return () => { cancelled = true; };
 }, []);
 
 const categories = ["All", "Education", "Healthcare", "Environment", "Emergency", "Animals"];

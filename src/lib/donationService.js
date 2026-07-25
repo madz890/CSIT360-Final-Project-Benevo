@@ -114,3 +114,30 @@ export async function getCampaignDonations(campaignId) {
 
   return data ?? [];
 }
+
+export async function getCampaignsDonationTotals(campaignIds = []) {
+  if (!Array.isArray(campaignIds) || campaignIds.length === 0) {
+    return {};
+  }
+  if (!isSupabaseConfigured || !supabase) {
+    return {};
+  }
+
+  const { data, error } = await supabase
+    .from("donations")
+    .select("campaign_id, amount")
+    .in("campaign_id", campaignIds);
+
+  if (error) {
+    console.error(error);
+    return {};
+  }
+
+  const totals = {};
+  for (const row of data ?? []) {
+    const id = row.campaign_id;
+    if (!id) continue;
+    totals[id] = (totals[id] || 0) + (Number(row.amount) || 0);
+  }
+  return totals;
+}
