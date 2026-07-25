@@ -67,3 +67,50 @@ export async function updateWalletAddress(userId, walletAddress) {
 
   return { success: true };
 }
+
+export async function getCampaignDonations(campaignId) {
+  if (!isSupabaseConfigured || !supabase) {
+    return [
+      {
+        id: "demo-donation-1",
+        campaign_id: campaignId,
+        amount: 150,
+        currency: "ADA",
+        tx_hash: "8b3fa2c7d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        profiles: { full_name: "Alex Johnson" },
+      },
+      {
+        id: "demo-donation-2",
+        campaign_id: campaignId,
+        amount: 75,
+        currency: "ADA",
+        tx_hash: "1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2",
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+        profiles: null,
+      },
+      {
+        id: "demo-donation-3",
+        campaign_id: campaignId,
+        amount: 500,
+        currency: "ADA",
+        tx_hash: "9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8",
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+        profiles: { full_name: "Sarah Chen", organization_name: "Green Future Org" },
+      },
+    ];
+  }
+
+  const { data, error } = await supabase
+    .from("donations")
+    .select("*, profiles:donor_id (id, full_name, organization_name)")
+    .eq("campaign_id", campaignId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data ?? [];
+}

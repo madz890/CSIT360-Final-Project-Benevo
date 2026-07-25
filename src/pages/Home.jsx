@@ -134,20 +134,6 @@ const featuredCampaigns = selectedCategory === "All"
 
             </div>
 
-            <div className="donation-card">
-
-              <img
-                src="https://i.pravatar.cc/150?img=25"
-                alt="Donor"
-              />
-
-              <div>
-                <p>Latest Donation</p>
-                <h2>₳250</h2>
-              </div>
-
-            </div>
-
           </div>
 
         </div>
