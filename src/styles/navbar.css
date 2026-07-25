@@ -3,12 +3,12 @@
 ===================================== */
 
 .navbar-wrapper {
-  position: fixed;
-  top: 20px;
-  left: 0;
+  position: sticky;
+  top: 0;
   width: 100%;
   display: flex;
   justify-content: center;
+  padding: 14px 0;
   z-index: 1000;
 }
 

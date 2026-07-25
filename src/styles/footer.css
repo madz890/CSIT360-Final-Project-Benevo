@@ -1,4 +1,4 @@
-.site-footer { padding: 72px 0 28px; background: var(--dark); color: color-mix(in srgb, var(--primary-light) 72%, var(--surface)); }
+.site-footer { margin-top: 90px; padding: 72px 0 28px; background: var(--dark); color: color-mix(in srgb, var(--primary-light) 72%, var(--surface)); }
 .footer-content { display: grid; grid-template-columns: minmax(260px, 1.7fr) 1fr 1fr; gap: 80px; }
 .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--surface); font-size: 21px; }
 .footer-logo svg { padding: 8px; box-sizing: content-box; border-radius: 12px; background: var(--primary); color: var(--surface); }

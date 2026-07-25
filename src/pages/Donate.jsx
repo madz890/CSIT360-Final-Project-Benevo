@@ -11,6 +11,9 @@ import useCardanoWallet from "../hooks/useCardanoWallet";
 import useFormState from "../hooks/useFormState";
 import DonationWalletPanel from "../components/donation/DonationWalletPanel";
 import DonationForm from "../components/donation/DonationForm";
+import { HeartHandshake, ShieldCheck, WalletCards } from "lucide-react";
+import Footer from "../components/Footer";
+import "../styles/donate.css";
 
 const DEFAULT_RECIPIENT_ADDRESS = import.meta.env.VITE_DONATION_ADDRESS || "";
 
@@ -124,24 +127,47 @@ function Donate() {
   };
 
   return (
-    <div className="card">
-      <h2>Donate to campaign</h2>
-      <p>{campaign?.title || "Select a campaign from the campaigns page"}</p>
-      <DonationWalletPanel
-        walletName={walletName}
-        walletStatus={walletStatus}
-        availableWallets={availableWallets}
-        walletConnecting={walletConnecting}
-        onConnectWallet={handleConnectWallet}
-      />
-      <DonationForm
-        form={form}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        loading={loading}
-      />
-      {message ? <p className="message">{message}</p> : null}
-    </div>
+    <main className="donate-page">
+      <section className="donate-hero">
+        <div className="container">
+          <span className="section-tag">Secure Cardano donation</span>
+          <h1>Make an impact today.</h1>
+          <p>Your contribution is securely recorded on the Cardano blockchain.</p>
+        </div>
+      </section>
+
+      <section className="container donate-layout">
+        <aside className="donate-campaign-card">
+          <span className="donate-card-label">You are supporting</span>
+          <h2>{campaign?.title || "A Benevo campaign"}</h2>
+          <p>{campaign?.description || "Select a campaign from the campaigns page to support a verified cause."}</p>
+          <div className="donate-assurance"><ShieldCheck size={20} /><span>Verified campaign and transparent donation tracking.</span></div>
+          <div className="donate-assurance"><HeartHandshake size={20} /><span>Every contribution helps bring a meaningful cause closer to its goal.</span></div>
+        </aside>
+
+        <div className="donate-form-card">
+          <div className="donate-form-heading">
+            <span className="donate-icon"><WalletCards size={22} /></span>
+            <div><h2>Complete your donation</h2><p>Connect a Cardano wallet to donate securely.</p></div>
+          </div>
+          <DonationWalletPanel
+            walletName={walletName}
+            walletStatus={walletStatus}
+            availableWallets={availableWallets}
+            walletConnecting={walletConnecting}
+            onConnectWallet={handleConnectWallet}
+          />
+          <DonationForm
+            form={form}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            loading={loading}
+          />
+          {message ? <p className="message">{message}</p> : null}
+        </div>
+      </section>
+      <Footer />
+    </main>
   );
 }
 

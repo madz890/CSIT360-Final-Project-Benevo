@@ -1,8 +1,35 @@
 .dashboard-grid {
+  width: min(1100px, 90%);
+  margin: 130px auto 80px;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  margin-top: 20px;
+}
+
+.create-campaign-page {
+  width: min(680px, 90%);
+  margin: 130px auto 80px;
+}
+
+.create-campaign-page form {
+  display: grid;
+  gap: 16px;
+}
+
+.create-campaign-page label {
+  display: grid;
+  gap: 7px;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.create-campaign-page button[type="submit"] {
+  margin-top: 8px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--surface);
+  font-weight: 700;
 }
 
 .card {

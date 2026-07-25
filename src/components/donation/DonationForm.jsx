@@ -8,7 +8,7 @@ export default function DonationForm({
 }) {
   return (
     <form onSubmit={handleSubmit} className="donation-form">
-      <label>
+      <label className="donation-field">
         Amount (ADA)
         <input
           name="amount"
@@ -18,7 +18,7 @@ export default function DonationForm({
           required
         />
       </label>
-      <label>
+      <label className="donation-field">
         Recipient address
         <input
           name="recipientAddress"
@@ -27,7 +27,7 @@ export default function DonationForm({
           required
         />
       </label>
-      <label>
+      <label className="donation-field">
         Wallet address
         <input
           name="walletAddress"
@@ -37,7 +37,7 @@ export default function DonationForm({
           required
         />
       </label>
-      <button type="submit" disabled={loading}>
+      <button className="primary-btn donation-submit" type="submit" disabled={loading}>
         {loading ? "Sending..." : "Send donation"}
       </button>
     </form>

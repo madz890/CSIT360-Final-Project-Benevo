@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabaseConfigMessage } from "../lib/supabase";
 import AuthToggle from "../components/AuthToggle";
 import FormField from "../components/FormField";
+import Footer from "../components/Footer";
 
 function Auth() {
   const navigate = useNavigate();
@@ -39,8 +40,9 @@ function Auth() {
   };
 
   return (
-    <div className="auth-card">
-      <h2>{mode === "login" ? "Sign in" : "Create account"}</h2>
+    <>
+      <main className="auth-card">
+        <h2>{mode === "login" ? "Sign in" : "Create account"}</h2>
       {supabaseConfigMessage ? (
         <p className="hint">{supabaseConfigMessage}</p>
       ) : null}
@@ -84,8 +86,10 @@ function Auth() {
         mode={mode}
         onToggle={() => setMode(mode === "login" ? "signup" : "login")}
       />
-      {message ? <p className="message">{message}</p> : null}
-    </div>
+        {message ? <p className="message">{message}</p> : null}
+      </main>
+      <Footer />
+    </>
   );
 }
 
