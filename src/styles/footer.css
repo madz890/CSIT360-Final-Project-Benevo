@@ -1,0 +1,14 @@
+.site-footer { padding: 72px 0 28px; background: var(--dark); color: color-mix(in srgb, var(--primary-light) 72%, var(--surface)); }
+.footer-content { display: grid; grid-template-columns: minmax(260px, 1.7fr) 1fr 1fr; gap: 80px; }
+.footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--surface); font-size: 21px; }
+.footer-logo svg { padding: 8px; box-sizing: content-box; border-radius: 12px; background: var(--primary); color: var(--surface); }
+.footer-brand p { max-width: 320px; line-height: 1.7; }
+.footer-socials { display: flex; gap: 12px; margin-top: 24px; }
+.footer-socials button { display: grid; width: 37px; height: 37px; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--surface) 10%, transparent); color: inherit; font-size: 14px; font-weight: 700; }
+.footer-socials button:hover { background: var(--primary); color: var(--surface); }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links h3 { margin-bottom: 6px; color: var(--surface); font-size: 15px; }
+.footer-links a { width: fit-content; color: inherit; }
+.footer-links a:hover { color: var(--surface); }
+.footer-bottom { display: flex; justify-content: space-between; margin-top: 58px; padding-top: 28px; border-top: 1px solid color-mix(in srgb, var(--surface) 15%, transparent); color: color-mix(in srgb, var(--primary-light) 50%, var(--text)); font-size: 14px; }
+@media (max-width: 700px) { .footer-content { grid-template-columns: 1fr; gap: 36px; } .footer-bottom { flex-direction: column; gap: 12px; margin-top: 42px; } }

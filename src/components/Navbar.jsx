@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Heart } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/navbar.css";
 
@@ -12,40 +13,75 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar">
-      <h2 className="logo">ADAid</h2>
+    <header className="navbar-wrapper">
+      <div className="navbar">
+        {/* Logo */}
+        <NavLink to="/" className="logo">
+          <div className="logo-icon">
+            <Heart fill="white" size={18} />
+          </div>
 
-      <ul className="nav-links">
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        {user ? (
-          <>
-            <li>
-              <Link to="/campaigns">Campaigns</Link>
-            </li>
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-            <li>
-              <Link to="/create-campaign">Create Campaign</Link>
-            </li>
-          </>
-        ) : null}
-      </ul>
+          <h2>Benevo</h2>
+        </NavLink>
 
-      <div className="nav-actions">
-        {user ? (
-          <button className="wallet-btn" onClick={handleSignOut}>
-            Sign Out
-          </button>
-        ) : (
-          <Link className="wallet-btn" to="/auth">
-            Sign In
-          </Link>
-        )}
+        {/* Navigation */}
+        <nav>
+          <ul className="nav-links">
+            <li>
+              <NavLink
+                to="/"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                Home
+              </NavLink>
+            </li>
+
+            {user && (
+              <>
+                <li>
+                  <NavLink
+                    to="/campaigns"
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
+                    Campaigns
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/create-campaign"
+                    className={({ isActive }) => (isActive ? "active" : "")}
+                  >
+                    Create Campaign
+                  </NavLink>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
+
+        <div className="nav-right">
+          {user ? (
+            <button className="donate-btn" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          ) : (
+            <Link to="/auth" className="donate-btn">
+              Sign In
+            </Link>
+          )}
+        </div>
       </div>
-    </nav>
+    </header>
   );
 }
 
